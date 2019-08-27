@@ -1,0 +1,108 @@
+spring:
+  application:
+    name: eureka-server
+
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    serviceUrl:
+      defaultZone: http://localhost:${server.port}/eureka/
+
+server:
+  master:
+    name: ${reg_master_ip:peer1}
+    port: ${reg_master_port:8001}
+  slave:
+    name: ${reg_slave_ip:peer2}
+    port: ${reg_slave_port:8002}
+  single:
+    name: ${reg_ip:peer1}
+    port: ${reg_port:8001}
+
+---
+server:
+  port: ${server.single.port}
+eureka:
+  instance:
+    hostname: ${server.single.name}
+  client:
+    register-with-eureka: true
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+---
+spring:
+  profiles: peer1
+server:
+  port: ${server.master.port}
+eureka:
+  instance:
+    hostname: ${server.master.name}
+  client:
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/,http://${server.slave.name}:${server.slave.port}/eureka/
+
+---
+spring:
+  profiles: peer2
+server:
+  port: ${server.slave.port}
+eureka:
+  instance:
+    hostname: ${server.slave.name}
+  client:
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/,http://${server.master.name}:${server.master.port}/eureka/
+
+---
+spring:
+  profiles: dev
+eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 5
+  server:
+    enable-self-preservation: false
+    renewal-percent-threshold: 0.85
+    renewal-threshold-update-interval-ms: 900000
+    eviction-interval-timer-in-ms: 20000
+    peer-eureka-nodes-update-interval-ms: 600000
+    peer-eureka-status-refresh-time-interval-ms: 30000
+  client:
+    registry-fetch-interval-seconds: 10
+    initial-instance-info-replication-interval-seconds: 15
+    instance-info-replication-interval-seconds: 10
+    eureka-service-url-poll-interval-seconds: 600
+
+---
+spring:
+  profiles: test
+eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 5
+  server:
+    enable-self-preservation: false
+    renewal-percent-threshold: 0.85
+    renewal-threshold-update-interval-ms: 900000
+    eviction-interval-timer-in-ms: 20000
+    peer-eureka-nodes-update-interval-ms: 600000
+    peer-eureka-status-refresh-time-interval-ms: 30000
+  client:
+    registry-fetch-interval-seconds: 10
+    initial-instance-info-replication-interval-seconds: 15
+    instance-info-replication-interval-seconds: 10
+    eureka-service-url-poll-interval-seconds: 600
+
+---
+spring:
+  profiles: pro
+eureka:
+  server:
+    enable-self-preservation: false
+  client:
